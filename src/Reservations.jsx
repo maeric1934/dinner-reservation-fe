@@ -62,7 +62,7 @@ const Reservations = ({setUserValue}) => {
         </div>
         {viewTypeId === 0 && <CalendarView reservations={reservations} />}
         {viewTypeId === 1 && <TableView reservations={reservations} />}
-        {viewTypeId === 2 && <ConfirmReservationOwner setUserValue={setUserValue} reservations={reservations} />}
+        {viewTypeId === 2 && <ConfirmReservationOwner setUserValue={setUserValue} />}
       </div>
     </motion.div>
   );

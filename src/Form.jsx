@@ -1,16 +1,23 @@
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { deleteRequest, postRequest, updateRequest } from './axiosConfig';
-import FormField from "./FormField";
+import FormField from './FormField';
 
-const TimeOptions = ({datetime, setUserValue, userData}) => {
-  const selectedTime = datetime.toString().split(' ')[1]; // Extracting the time from datetime
+const TimeOptions = ({ datetime, setUserValue, userData }) => {
+  const selectedTime = datetime.toString().split(' ')[1];
+
+  const handleTimeChange = (e) => {
+    setUserValue({ ...userData, reservation_time: e.target.value });
+  };
 
   return (
-    <select 
-      onChange={(e) => setUserValue({ ...userData, reservation_time: e.target.value })}
+    <select
+      onChange={handleTimeChange}
       value={selectedTime}
-      className="form-control" id="reservation_time" name="reservation_time">
+      className="form-control"
+      id="reservation_time"
+      name="reservation_time"
+    >
       <option disabled>Select time</option>
       <option value={'18:00'}>6:00 PM</option>
       <option value={'18:30'}>6:30 PM</option>
@@ -24,17 +31,13 @@ const TimeOptions = ({datetime, setUserValue, userData}) => {
   );
 };
 
-const Form = ({userData, setUserValue, defaultFormValue}) => {
-
+const Form = ({ userData, setUserValue, defaultFormValue }) => {
   const [reservationToken, setReservationToken] = useState(null);
-  
+
   const saveData = async (event) => {
     event.preventDefault();
-
     const formData = new FormData(event.target);
-  
     const formattedDateTimeString = `${formData.get('reservation_date')} ${formData.get('reservation_time')}`;
-  
     formData.set('reservation_datetime', formattedDateTimeString);
 
     const requestBody = {};
@@ -43,12 +46,9 @@ const Form = ({userData, setUserValue, defaultFormValue}) => {
     });
 
     try {
+      const response = userData.id === -1 ? await postRequest('/add-reservation', requestBody) : await updateRequest('/update-reservation', userData.id, requestBody);
 
-      const response = userData['id'] == -1 
-        ? await postRequest('/add-reservation', requestBody)
-        : await updateRequest('/update-reservation', userData['id'], requestBody)
-
-      if(userData['id'] == -1 ){
+      if (userData.id === -1) {
         setReservationToken(response);
       }
 
@@ -61,13 +61,16 @@ const Form = ({userData, setUserValue, defaultFormValue}) => {
   const deleteReservation = async (event) => {
     event.preventDefault();
     try {
-
-      const response = await deleteRequest('/delete-reservation', userData['id'])
+      await deleteRequest('/delete-reservation', userData.id);
       setUserValue(defaultFormValue);
     } catch (error) {
       console.error('Error making request:', error.message);
     }
-  }
+  };
+
+  const handleGuestsChange = (e) => {
+    setUserValue({ ...userData, number_of_guests: e.target.value });
+  };
 
   return (
     <motion.div
@@ -117,12 +120,10 @@ const Form = ({userData, setUserValue, defaultFormValue}) => {
               type="date"
             />
             <div className="form-group col">
-              <label htmlFor="reservation_time"><small className="text-danger"> * </small>Time</label>
-              <TimeOptions 
-                userData={userData}
-                setUserValue={setUserValue}
-                datetime={userData['reservation_datetime']}
-              />
+              <label htmlFor="reservation_time">
+                <small className="text-danger"> * </small>Time
+              </label>
+              <TimeOptions userData={userData} setUserValue={setUserValue} datetime={userData.reservation_datetime} />
             </div>
           </div>
           <div className="row py-2">
@@ -136,17 +137,23 @@ const Form = ({userData, setUserValue, defaultFormValue}) => {
               placeholder="Enter phone number"
             />
             <div className="form-group col">
-              <label htmlFor="number_of_guests"><small className="text-danger"> * </small>Number of Guests</label>
-              <select 
-                onChange={(e) => setUserValue({ ...userData, number_of_guests: e.target.value })}
-                value={userData['number_of_guests']} className="form-control" id="number_of_guests" name="number_of_guests">
+              <label htmlFor="number_of_guests">
+                <small className="text-danger"> * </small>Number of Guests
+              </label>
+              <select
+                onChange={handleGuestsChange}
+                value={userData.number_of_guests}
+                className="form-control"
+                id="number_of_guests"
+                name="number_of_guests"
+              >
                 {[1, 2, 3, 4, 5].map((guests) => (
                   <option key={guests}>{guests}</option>
                 ))}
               </select>
             </div>
           </div>
-          <div className="container pt-5">
+          <div className="container pt-5 d-flex justify-content-around">
             <button type="submit" className="btn btn-primary">
               {userData['id'] != -1 ? 'Update' : 'Book'} Reservation
             </button>
@@ -166,7 +173,6 @@ const Form = ({userData, setUserValue, defaultFormValue}) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className='token-viewer'
-            onClick={()=>{setReservationToken(null)}}
         >
             <motion.div
                 initial={{ opacity: 0 }}
