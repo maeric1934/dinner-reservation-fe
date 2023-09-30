@@ -1,0 +1,15 @@
+node ^18
+npm ^8
+axios: ^1.5.1
+bootstrap ^5.3.2
+framer-motion ^10.16.4
+moedim ^0.5.0
+moment ^2.29.4
+
+ # Instruction
+    if non-docker setup
+        1. run 'npm install'
+        2. run 'npm start'
+
+    if dockererize
+        1. run 'docker-compose up -d'
